@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.entity.Library;
 import com.example.entity.Log;
@@ -77,6 +78,30 @@ public class LibraryController {
 		return "redirect:/library";
 	}
 
+	@GetMapping("/return")
+	public String returnBook(@RequestParam("id") Integer id, @AuthenticationPrincipal LoginUser loginUser, RedirectAttributes redirectAttributes) {
+	    // 書籍IDをもとに書籍情報を取得
+	    Library library = libraryService.getLibraryById(id);
+
+	    if (library != null) {
+	        // 書籍のUSER_IDを0に設定して更新
+	        library.setUserId(0);
+	        libraryService.save(library);
+
+	        // 最新のログを取得
+	        List<Log> logs = logService.findLatestLogByLibraryId(id);
+
+	        if (!logs.isEmpty()) {
+	            Log latestLog = logs.get(0); // 最新のログを取得
+
+	            // 返却日時を設定
+	            latestLog.setReturnDate(LocalDateTime.now());
+	            logService.save(latestLog);
+	        }
+        }
+	    return "redirect:/library";
+	}
+	
 	@GetMapping("/history")
 	public String history(Model model, @AuthenticationPrincipal LoginUser loginUser) {
 		// ログインしているユーザーのIDを取得
