@@ -4,16 +4,15 @@
     <title>side bar</title>
 </head>
 <body>
-<div th:fragment="sidebar" class="sidebar" data-background-color="white" data-active-color="danger">
+<div th:fragment="sidebar" class="sidebar"
+    data-background-color="white" data-active-color="danger">
     <div class="sidebar-wrapper">
         <div class="logo">
-            <a href="library.html" class="simple-text">
-                XX  Library
-            </a>
+            <a href="/library" class="simple-text"> XX Library </a>
         </div>
         <ul class="nav">
-            <li class="active">
-                <a href="index">
+            <li class="link">
+                <a href="/library">
                     <i class="ti-book"></i>
                     <p>Book List</p>
                 </a>
@@ -25,14 +24,21 @@
                 </a>
             </li>
             <li class="link">
-                <form action="">
-                    <button>
-                        <i class="ti-back-left"></i>
-                        Logout
-                    </button>
-                </form>
-            </li>
+    <form th:action="@{/logout}" method="post">
+        <button type="submit">
+            <i class="ti-back-left"></i>
+            Logout
+        </button>
+    </form>
+</li>
         </ul>
+        <!-- 以下の要素を追加 -->
+        <ul sec:authorize="isAuthenticated()" class="nav">
+    <li class="user panel-body">
+        <!-- Authenticationオブジェクトからユーザー名を取得 -->
+        <p th:text="${#authentication.getName()} + 'さんがログイン中'" />
+    </li>
+</ul>
     </div>
 </div>
 </body>

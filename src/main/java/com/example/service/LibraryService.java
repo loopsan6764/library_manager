@@ -22,4 +22,7 @@ public class LibraryService {
         return this.libraryRepository.findAll();
     }
 
+    public Library getLibraryById(Integer id) {
+        return this.libraryRepository.findById(id).orElse(null);
+    }
 }
