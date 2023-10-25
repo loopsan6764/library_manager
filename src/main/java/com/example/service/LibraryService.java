@@ -25,4 +25,8 @@ public class LibraryService {
     public Library getLibraryById(Integer id) {
         return this.libraryRepository.findById(id).orElse(null);
     }
+
+    public void save(Library library) {
+        libraryRepository.save(library);
+    }
 }
