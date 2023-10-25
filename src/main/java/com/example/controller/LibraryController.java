@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +17,7 @@ import com.example.entity.Logs;
 import com.example.service.LibraryService;
 import com.example.service.LoginUser;
 import com.example.service.LogsService;
+
 
 @Controller
 @RequestMapping("library")
@@ -47,9 +49,7 @@ public class LibraryController {
     }
     
     @PostMapping("/borrow")
-    public String borrow(@RequestParam("id") Integer id,
-                         @RequestParam("return_due_date") String returnDueDate,
-                         @AuthenticationPrincipal LoginUser loginUser) {
+    public String borrow(@RequestParam("id") Integer id, @RequestParam("return_due_date") String returnDueDate, @AuthenticationPrincipal LoginUser loginUser) {
         // 1. 書籍IDに基づいて書籍情報を取得
         Library library = libraryService.getLibraryById(id);
 
@@ -75,5 +75,20 @@ public class LibraryController {
 
         // 5. リストページにリダイレクト
         return "redirect:/library";
+    }
+    
+    @GetMapping("/history")
+    public String history(Model model, @AuthenticationPrincipal LoginUser loginUser) {
+        // ログインしているユーザーのIDを取得
+        Integer userId = loginUser.getUser().getId();
+
+        // ログインユーザーに紐づく貸し出し履歴を取得（例：LogServiceのメソッドを呼び出して取得する）
+        List<Logs> borrowHistory = logsService.getBorrowHistoryByUserId(userId);
+
+        // Modelに貸し出し履歴をセット
+        model.addAttribute("borrowHistory", borrowHistory);
+
+        // borrowHistory.html テンプレートを表示
+        return "borrowHistory";
     }
 }
