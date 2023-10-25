@@ -2,6 +2,7 @@ package com.example.entity;
 
 import java.time.LocalDateTime;
 
+@Entity
 public class Logs {
     public void setLibraryId(Integer libraryId) {
         this.libraryId = libraryId;

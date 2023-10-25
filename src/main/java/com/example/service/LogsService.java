@@ -2,12 +2,21 @@ package com.example.service;
 
 import java.time.LocalDateTime;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.entity.Logs;
+import com.example.repository.LogsRepository; // LogsRepository のインポートが必要
 
 @Service
 public class LogsService {
+
+    private final LogsRepository logsRepository; // LogsRepository のDI
+
+    @Autowired
+    public LogsService(LogsRepository logsRepository) {
+        this.logsRepository = logsRepository;
+    }
 
     // ログを生成
     public void createLog(int libraryId, int userId, String returnDueDate) {
@@ -23,5 +32,7 @@ public class LogsService {
         // return_dateにはNULLを設定
         log.setReturnDate(null);
         
+        // ログをデータベースに保存
+        logsRepository.save(log);
     }
 }
