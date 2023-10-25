@@ -13,82 +13,82 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.entity.Library;
-import com.example.entity.Logs;
+import com.example.entity.Log;
 import com.example.service.LibraryService;
+import com.example.service.LogService;
 import com.example.service.LoginUser;
-import com.example.service.LogsService;
-
 
 @Controller
 @RequestMapping("library")
 public class LibraryController {
 
-	 private final LibraryService libraryService;
-	    private final LogsService logsService;
+	private final LibraryService libraryService;
+	private final LogService logService;
 
-	    @Autowired
-	    public LibraryController(LibraryService libraryService, LogsService logsService) {
-	        this.libraryService = libraryService;
-	        this.logsService = logsService;
-	    }
+	@Autowired
+	public LibraryController(LibraryService libraryService, LogService logService) {
+		this.libraryService = libraryService;
+		this.logService = logService;
+	}
 
-    @GetMapping
-    public String index(Model model) {
-        List<Library> libraries = this.libraryService.findAll();
-        model.addAttribute("libraries", libraries);
-        return "library/index";
-    }
-    
-    @GetMapping("/borrow")
-    public String borrowingForm(@RequestParam("id") Integer id, Model model) {
-        Library library = libraryService.getLibraryById(id);
-        
-        model.addAttribute("library", library);
-        
-         return "library/borrowingForm"; // borrowingForm.html テンプレートを表示
-    }
-    
-    @PostMapping("/borrow")
-    public String borrow(@RequestParam("id") Integer id, @RequestParam("return_due_date") String returnDueDate, @AuthenticationPrincipal LoginUser loginUser) {
-        // 1. 書籍IDに基づいて書籍情報を取得
-        Library library = libraryService.getLibraryById(id);
+	@GetMapping
+	public String index(Model model) {
+		List<Library> libraries = this.libraryService.findAll();
+		model.addAttribute("libraries", libraries);
+		return "library/index";
+	}
 
-        if (library != null) {
-            // 2. ログインユーザーのIDを取得
-            Integer userId = loginUser.getUser().getId();
+	@GetMapping("/borrow")
+	public String borrowingForm(@RequestParam("id") Integer id, Model model) {
+		Library library = libraryService.getLibraryById(id);
 
-            // 3. 書籍情報を更新（USER_IDを上書き）
-            library.setUserId(userId);
-            libraryService.save(library);
+		model.addAttribute("library", library);
 
-            // 4. 新しいログを生成
-            Logs log = new Logs();
-            log.setLibraryId(library.getId());
-            log.setUserId(userId);
-            log.setRentDate(LocalDateTime.now());
-            // 返却予定日をパースし、T00:00:00を連結
-            LocalDateTime returnDueDateTime = LocalDateTime.parse(returnDueDate + "T00:00:00");
-            log.setReturnDueDate(returnDueDateTime);
-            log.setReturnDate(null); // return_dateにはNULLを設定
-            logsService.save(log);
-        }
+		return "library/borrowingForm"; // borrowingForm.html テンプレートを表示
+	}
 
-        // 5. リストページにリダイレクト
-        return "redirect:/library";
-    }
-    
-    @GetMapping("/history")
-    public String history(Model model, @AuthenticationPrincipal LoginUser loginUser) {
-        // ログインしているユーザーのIDを取得
-        Integer userId = loginUser.getUser().getId();
+	@PostMapping("/borrow")
+	public String borrow(@RequestParam("id") Integer id, @RequestParam("return_due_date") String returnDueDate,
+			@AuthenticationPrincipal LoginUser loginUser) {
+		// 1. 書籍IDに基づいて書籍情報を取得
+		Library library = libraryService.getLibraryById(id);
 
-        // ログインユーザーに紐づく貸し出し履歴を取得（例：LogServiceのメソッドを呼び出して取得する）
-        List<Logs> borrowHistory = logsService.getBorrowHistoryByUserId(userId);
+		if (library != null) {
+			// 2. ログインユーザーのIDを取得
+			Integer userId = loginUser.getUser().getId();
 
-        // Modelに貸し出し履歴をセット
-        model.addAttribute("borrowHistory", borrowHistory);
+			// 3. 書籍情報を更新（USER_IDを上書き）
+			library.setUserId(userId);
+			libraryService.save(library);
 
-        // borrowHistory.html テンプレートを表示
-        return "borrowHistory";
-    }
+			// 4. 新しいログを生成
+			Log log = new Log();
+			log.setLibraryId(library.getId());
+			log.setUserId(userId);
+			log.setRentDate(LocalDateTime.now());
+			// 返却予定日をパースし、T00:00:00を連結
+			LocalDateTime returnDueDateTime = LocalDateTime.parse(returnDueDate + "T00:00:00");
+			log.setReturnDueDate(returnDueDateTime);
+			log.setReturnDate(null); // return_dateにはNULLを設定
+			logService.save(log);
+		}
+
+		// 5. リストページにリダイレクト
+		return "redirect:/library";
+	}
+
+	@GetMapping("/history")
+	public String history(Model model, @AuthenticationPrincipal LoginUser loginUser) {
+		// ログインしているユーザーのIDを取得
+		Integer userId = loginUser.getUser().getId();
+
+		// ログインユーザーに紐づく貸し出し履歴を取得（例：LogServiceのメソッドを呼び出して取得する）
+		List<Log> borrowHistory = logService.getBorrowHistoryByUserId(userId);
+
+		// Modelに貸し出し履歴をセット
+		model.addAttribute("borrowHistory", borrowHistory);
+
+		// borrowHistory.html テンプレートを表示
+		return "borrowHistory";
+	}
 }
