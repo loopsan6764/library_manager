@@ -79,29 +79,30 @@ public class LibraryController {
 	}
 
 	@GetMapping("/return")
-	public String returnBook(@RequestParam("id") Integer id, @AuthenticationPrincipal LoginUser loginUser, RedirectAttributes redirectAttributes) {
-	    // 書籍IDをもとに書籍情報を取得
-	    Library library = libraryService.getLibraryById(id);
+	public String returnBook(@RequestParam("id") Integer id, @AuthenticationPrincipal LoginUser loginUser,
+			RedirectAttributes redirectAttributes) {
+		// 書籍IDをもとに書籍情報を取得
+		Library library = libraryService.getLibraryById(id);
 
-	    if (library != null) {
-	        // 書籍のUSER_IDを0に設定して更新
-	        library.setUserId(0);
-	        libraryService.save(library);
+		if (library != null) {
+			// 書籍のUSER_IDを0に設定して更新
+			library.setUserId(0);
+			libraryService.save(library);
 
-	        // 最新のログを取得
-	        List<Log> logs = logService.findLatestLogByLibraryId(id);
+			// 最新のログを取得
+			List<Log> logs = logService.findLatestLogByLibraryId(id);
 
-	        if (!logs.isEmpty()) {
-	            Log latestLog = logs.get(0); // 最新のログを取得
+			if (!logs.isEmpty()) {
+				Log latestLog = logs.get(0); // 最新のログを取得
 
-	            // 返却日時を設定
-	            latestLog.setReturnDate(LocalDateTime.now());
-	            logService.save(latestLog);
-	        }
-        }
-	    return "redirect:/library";
+				// 返却日時を設定
+				latestLog.setReturnDate(LocalDateTime.now());
+				logService.save(latestLog);
+			}
+		}
+		return "redirect:/library";
 	}
-	
+
 	@GetMapping("/history")
 	public String history(Model model, @AuthenticationPrincipal LoginUser loginUser) {
 		// ログインしているユーザーのIDを取得
