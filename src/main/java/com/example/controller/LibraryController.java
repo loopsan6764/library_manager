@@ -78,7 +78,7 @@ public class LibraryController {
 		return "redirect:/library";
 	}
 
-	@GetMapping("/return")
+	@PostMapping("/return")
 	public String returnBook(@RequestParam("id") Integer id, @AuthenticationPrincipal LoginUser loginUser,
 			RedirectAttributes redirectAttributes) {
 		// 書籍IDをもとに書籍情報を取得
@@ -115,6 +115,6 @@ public class LibraryController {
 		model.addAttribute("borrowHistory", borrowHistory);
 
 		// borrowHistory.html テンプレートを表示
-		return "borrowHistory";
+		return "library/borrowHistory";
 	}
 }
